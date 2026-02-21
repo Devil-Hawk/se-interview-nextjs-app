@@ -1,15 +1,18 @@
 // Import the base CSS styles for the radix-ui components.
 import "@radix-ui/themes/styles.css";
+import "@workos-inc/widgets/base.css";
 
 import type { Metadata } from "next";
 import NextLink from "next/link";
 import { Theme, Card, Container, Flex, Button, Box } from "@radix-ui/themes";
 import { Footer } from "./components/footer";
 import { SignInButton } from "./components/sign-in-button";
+import { QueryProvider } from "./components/query-provider";
 import {
   AuthKitProvider,
   Impersonation,
 } from "@workos-inc/authkit-nextjs/components";
+import { WorkOsWidgets } from "@workos-inc/widgets";
 
 export const metadata: Metadata = {
   title: "Example AuthKit Authenticated App",
@@ -29,6 +32,8 @@ export default function RootLayout({
           panelBackground="solid"
           style={{ backgroundColor: "var(--gray-1)" }}
         >
+          <QueryProvider>
+          <WorkOsWidgets>
           <AuthKitProvider>
             <Impersonation />
             <Container style={{ backgroundColor: "var(--gray-1)" }}>
@@ -46,6 +51,10 @@ export default function RootLayout({
                             <Button asChild variant="soft">
                               <NextLink href="/account">Account</NextLink>
                             </Button>
+                            <Button asChild variant="soft">
+                              <NextLink href="/team">Team</NextLink>
+                            </Button>
+
                           </Flex>
 
                           <SignInButton />
@@ -62,6 +71,8 @@ export default function RootLayout({
               </Flex>
             </Container>
           </AuthKitProvider>
+          </WorkOsWidgets>
+          </QueryProvider>
         </Theme>
       </body>
     </html>
