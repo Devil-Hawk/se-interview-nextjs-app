@@ -1,30 +1,28 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { UsersManagement, UsersManagementLoading } from "@workos-inc/widgets";
+import { switchToOrganization } from "@workos-inc/authkit-nextjs";
+import { OrganizationSwitcher, OrganizationSwitcherLoading } from "@workos-inc/widgets";
 import { Button, Callout } from "@radix-ui/themes";
 import NextLink from "next/link";
-import { USERS_TABLE_PERMISSION } from "@/app/lib/permissions";
 import { TokenError } from "@/app/lib/types";
 import { fetchWidgetToken } from "@/app/lib/fetch-widget-token";
 
-export function UsersManagementWidget() {
+export function OrganizationSwitcherWidget() {
     const { data: token, isLoading, error, refetch } = useQuery<string, TokenError>({
-        queryKey: ["users-management-token"],
-        queryFn: () => fetchWidgetToken("/api/widgets/users-management-token"),
+        queryKey: ["org-switcher-token"],
+        queryFn: () => fetchWidgetToken("/api/widgets/org-switcher-token"),
         // tokens expire at 60 min; cache for 55 so the widget never receives an already-expired token
         staleTime: 55 * 60 * 1000,
         // 401/403 errors wont get fixed by retrying so we skip retries
         retry: false,
     });
 
-    if (isLoading) return <UsersManagementLoading />;
+    if (isLoading) return <OrganizationSwitcherLoading />;
 
     if (error) {
         const message =
-            error.status === 401 ? "Your session expired. Please sign in again." :
-            error.status === 403 ? `Your role needs the ${USERS_TABLE_PERMISSION} permission. Ask an admin.` :
-            "Could not load the user management widget.";
+            error.status === 401 ? "Your session expired. Please sign in again." : "Could not load the org switcher.";
 
         return (
             <Callout.Root color="red" role="alert">
@@ -46,9 +44,18 @@ export function UsersManagementWidget() {
 
     if (!token) return (
         <Callout.Root color="red" role="alert">
-            <Callout.Text>Could not load the user management widget.</Callout.Text>
+            <Callout.Text>Could not load the org switcher.</Callout.Text>
         </Callout.Root>
     );
 
-    return <UsersManagement authToken={token} />;
+    // switchToOrganization is a server action from authkit, it updates the session to the new org.
+    // The widget gives us { organizationId } as an object but the action needs just the string id, so we pull it out
+    return (
+        <OrganizationSwitcher
+            authToken={token}
+            switchToOrganization={async ({ organizationId }) => {
+                await switchToOrganization(organizationId);
+            }}
+        />
+    );
 }

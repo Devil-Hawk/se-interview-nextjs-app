@@ -1,10 +1,11 @@
 // Import the base CSS styles for the radix-ui components.
 import "@radix-ui/themes/styles.css";
 import "@workos-inc/widgets/base.css";
+import "./widgets-overrides.css";
 
 import type { Metadata } from "next";
 import NextLink from "next/link";
-import { Theme, Card, Container, Flex, Button, Box } from "@radix-ui/themes";
+import { Card, Container, Flex, Button, Box } from "@radix-ui/themes";
 import { Footer } from "./components/footer";
 import { SignInButton } from "./components/sign-in-button";
 import { QueryProvider } from "./components/query-provider";
@@ -13,6 +14,10 @@ import {
   Impersonation,
 } from "@workos-inc/authkit-nextjs/components";
 import { WorkOsWidgets } from "@workos-inc/widgets";
+import { OrganizationSwitcherWidget } from "./components/org-switcher-widget";
+import { ThemeProvider } from "./components/theme-provider";
+import { ThemeToggle } from "./components/theme-toggle";
+
 
 export const metadata: Metadata = {
   title: "Example AuthKit Authenticated App",
@@ -25,55 +30,56 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    // suppressHydrationWarning is needed because next-themes changes the html element on the client
+    <html lang="en" suppressHydrationWarning>
       <body style={{ padding: 0, margin: 0 }}>
-        <Theme
-          accentColor="iris"
-          panelBackground="solid"
-          style={{ backgroundColor: "var(--gray-1)" }}
-        >
+        <ThemeProvider>
           <QueryProvider>
-          <WorkOsWidgets>
-          <AuthKitProvider>
-            <Impersonation />
-            <Container style={{ backgroundColor: "var(--gray-1)" }}>
-              <Flex direction="column" gap="5" p="5" height="100vh">
-                <Box asChild flexGrow="1">
-                  <Card size="4">
-                    <Flex direction="column" height="100%">
-                      <Flex asChild justify="between">
-                        <header>
-                          <Flex gap="4">
-                            <Button asChild variant="soft">
-                              <NextLink href="/">Home</NextLink>
-                            </Button>
+            <WorkOsWidgets>
+              <AuthKitProvider>
+                <Impersonation />
+                <Container style={{ backgroundColor: "var(--gray-1)" }}>
+                  <Flex direction="column" gap="5" p="5" height="100vh">
+                    <Box asChild flexGrow="1">
+                      <Card size="4">
+                        <Flex direction="column" height="100%">
+                          <Flex asChild justify="between">
+                            <header>
+                              <Flex gap="4">
+                                <Button asChild variant="soft">
+                                  <NextLink href="/">Home</NextLink>
+                                </Button>
 
-                            <Button asChild variant="soft">
-                              <NextLink href="/account">Account</NextLink>
-                            </Button>
-                            <Button asChild variant="soft">
-                              <NextLink href="/team">Team</NextLink>
-                            </Button>
+                                <Button asChild variant="soft">
+                                  <NextLink href="/account">Account</NextLink>
+                                </Button>
 
+                                <Button asChild variant="soft">
+                                  <NextLink href="/team">Team</NextLink>
+                                </Button>
+                              </Flex>
+
+                              <Flex gap="3" align="center">
+                                <OrganizationSwitcherWidget />
+                                <ThemeToggle />
+                                <SignInButton />
+                              </Flex>
+                            </header>
                           </Flex>
 
-                          <SignInButton />
-                        </header>
-                      </Flex>
-
-                      <Flex flexGrow="1" align="center" justify="center">
-                        <main>{children}</main>
-                      </Flex>
-                    </Flex>
-                  </Card>
-                </Box>
-                <Footer />
-              </Flex>
-            </Container>
-          </AuthKitProvider>
-          </WorkOsWidgets>
+                          <Flex flexGrow="1" align="center" justify="center">
+                            <main>{children}</main>
+                          </Flex>
+                        </Flex>
+                      </Card>
+                    </Box>
+                    <Footer />
+                  </Flex>
+                </Container>
+              </AuthKitProvider>
+            </WorkOsWidgets>
           </QueryProvider>
-        </Theme>
+        </ThemeProvider>
       </body>
     </html>
   );

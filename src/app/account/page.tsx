@@ -1,5 +1,7 @@
 import { withAuth } from "@workos-inc/authkit-nextjs";
 import { Text, Heading, TextField, Flex, Box } from "@radix-ui/themes";
+import { UserProfileWidget } from "@/app/components/user-profile-widget";
+
 
 export default async function AccountPage() {
   const { user, role, permissions } = await withAuth({ ensureSignedIn: true });
@@ -24,10 +26,10 @@ export default async function AccountPage() {
         </Text>
       </Flex>
 
-      {userFields && (
+      {userFields.length > 0 && (
         <Flex direction="column" justify="center" gap="3" width="400px">
           {userFields.map(([label, value]) => (
-            <Flex asChild align="center" gap="6" key={String(value)}>
+            <Flex asChild align="center" gap="6" key={String(label)}>
               <label>
                 <Text weight="bold" size="3" style={{ width: 100 }}>
                   {label}
@@ -41,6 +43,9 @@ export default async function AccountPage() {
           ))}
         </Flex>
       )}
+      <Box mt="6">
+        <UserProfileWidget />
+      </Box>
     </>
   );
 }

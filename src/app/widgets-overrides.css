@@ -1,0 +1,9 @@
+/* WorkOsWidgets renders its own Radix Theme wrapper which creates a positioning
+   context. Dialogs using position:absolute briefly anchor to that instead of
+   the viewport before the overlay takes over — fix by forcing position:fixed */
+.woswidgets-dialog {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
