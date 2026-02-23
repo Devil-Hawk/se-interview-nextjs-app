@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import { switchToOrganization } from "@workos-inc/authkit-nextjs";
 import { OrganizationSwitcher, OrganizationSwitcherLoading } from "@workos-inc/widgets";
 import { Button, Callout } from "@radix-ui/themes";
@@ -9,6 +10,7 @@ import { TokenError } from "@/app/lib/types";
 import { fetchWidgetToken } from "@/app/lib/fetch-widget-token";
 
 export function OrganizationSwitcherWidget() {
+    const { user } = useAuth();
     const { data: token, isLoading, error, refetch } = useQuery<string, TokenError>({
         queryKey: ["org-switcher-token"],
         queryFn: () => fetchWidgetToken("/api/widgets/org-switcher-token"),
@@ -16,7 +18,11 @@ export function OrganizationSwitcherWidget() {
         staleTime: 55 * 60 * 1000,
         // 401/403 errors wont get fixed by retrying so we skip retries
         retry: false,
+        // dont fetch if user is not signed in, no point showing the switcher
+        enabled: !!user,
     });
+
+    if (!user) return null;
 
     if (isLoading) return <OrganizationSwitcherLoading />;
 
@@ -54,7 +60,10 @@ export function OrganizationSwitcherWidget() {
         <OrganizationSwitcher
             authToken={token}
             switchToOrganization={async ({ organizationId }) => {
-                await switchToOrganization(organizationId);
+                // revalidationStrategy none stops authkit from doing its own soft redirect
+                // so we can do a hard reload instead, which clears React Query cache and shows the new org correctly
+                await switchToOrganization(organizationId, { revalidationStrategy: "none" });
+                window.location.href = "/";
             }}
         />
     );
